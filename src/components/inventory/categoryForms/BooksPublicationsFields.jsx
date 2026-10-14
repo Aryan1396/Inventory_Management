@@ -43,7 +43,7 @@ const BooksPublicationsFields = ({ data = {}, onChange }) => {
         <div className="flex items-center gap-2">
           <span className="text-base">📚</span>
           <h4 className="font-bold text-stone-900 text-sm tracking-tight">
-            4. Books & Publications Specifications
+            Books Specifications
           </h4>
         </div>
 

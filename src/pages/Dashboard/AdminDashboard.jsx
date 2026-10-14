@@ -5,12 +5,16 @@ const AdminDashboard = ({
   activeTab,
   onSelectTab,
   items,
+  editingItem,
+  onStartEdit,
   onItemAdded,
+  onItemUpdated,
   onDeleteItem,
+  onCancelEdit,
 }) => {
   return (
     <div className="space-y-8">
-      {/* Aesthetic Hero Banner with the ONLY Segmented Switcher Control */}
+      {/* Aesthetic Hero Banner with Unified Segmented Switcher Control */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 text-white p-6 sm:p-8 shadow-md shadow-orange-600/15">
         {/* Subtle decorative background circles */}
         <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-white/10 blur-2xl pointer-events-none" />
@@ -32,11 +36,14 @@ const AdminDashboard = ({
             </p>
           </div>
 
-          {/* THE SINGLE, UNIFIED SWITCHER BUTTON (Given ONLY ONCE in the whole application) */}
+          {/* THE SINGLE, UNIFIED SWITCHER BUTTON */}
           <div className="shrink-0 bg-white/15 backdrop-blur-md p-1.5 rounded-2xl border border-white/25 flex items-center shadow-lg">
             <button
               type="button"
-              onClick={() => onSelectTab('view')}
+              onClick={() => {
+                if (onCancelEdit) onCancelEdit();
+                onSelectTab('view');
+              }}
               className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all cursor-pointer ${
                 activeTab === 'view'
                   ? 'bg-white text-orange-700 shadow-md shadow-stone-900/10'
@@ -57,14 +64,19 @@ const AdminDashboard = ({
 
             <button
               type="button"
-              onClick={() => onSelectTab('insert')}
+              onClick={() => {
+                if (editingItem && onCancelEdit) {
+                  onCancelEdit();
+                }
+                onSelectTab('insert');
+              }}
               className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all cursor-pointer ${
                 activeTab === 'insert'
                   ? 'bg-white text-orange-700 shadow-md shadow-stone-900/10'
                   : 'text-white hover:bg-white/15'
               }`}
             >
-              <span>+ Insert Data</span>
+              <span>{editingItem ? '✏️ Edit Product' : '+ Insert Data'}</span>
             </button>
           </div>
         </div>
@@ -73,13 +85,18 @@ const AdminDashboard = ({
       {/* Main Content View */}
       {activeTab === 'insert' ? (
         <InventoryForm
+          key={editingItem ? editingItem.id : 'new-product-form'}
+          initialData={editingItem}
+          isEditMode={Boolean(editingItem)}
           onItemAdded={onItemAdded}
-          onCancel={() => onSelectTab('view')}
+          onItemUpdated={onItemUpdated}
+          onCancel={onCancelEdit || (() => onSelectTab('view'))}
         />
       ) : (
         <InventoryTable
           items={items}
           onDeleteItem={onDeleteItem}
+          onEditItem={onStartEdit}
         />
       )}
     </div>

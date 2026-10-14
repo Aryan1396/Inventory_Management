@@ -6,6 +6,7 @@ import { inventoryService } from './services/inventory/inventoryService';
 const App = () => {
   const [activeTab, setActiveTab] = useState('view');
   const [items, setItems] = useState(() => inventoryService.getAll());
+  const [editingItem, setEditingItem] = useState(null);
 
   const handleItemAdded = (newItemData) => {
     const updated = inventoryService.addItem(newItemData);
@@ -13,9 +14,29 @@ const App = () => {
     setActiveTab('view');
   };
 
+  const handleItemUpdated = (updatedItemData) => {
+    const updated = inventoryService.updateItem(updatedItemData.id, updatedItemData);
+    setItems(updated);
+    setEditingItem(null);
+    setActiveTab('view');
+  };
+
+  const handleStartEdit = (item) => {
+    setEditingItem(item);
+    setActiveTab('insert');
+  };
+
+  const handleCancelEdit = () => {
+    setEditingItem(null);
+    setActiveTab('view');
+  };
+
   const handleDeleteItem = (id) => {
     const updated = inventoryService.deleteItem(id);
     setItems(updated);
+    if (editingItem?.id === id) {
+      setEditingItem(null);
+    }
   };
 
   return (
@@ -27,10 +48,19 @@ const App = () => {
       <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
         <AdminDashboard
           activeTab={activeTab}
-          onSelectTab={setActiveTab}
+          onSelectTab={(tab) => {
+            if (tab === 'insert' && activeTab === 'view') {
+              setEditingItem(null); // When clicking Insert Data directly from view, start fresh
+            }
+            setActiveTab(tab);
+          }}
           items={items}
+          editingItem={editingItem}
+          onStartEdit={handleStartEdit}
           onItemAdded={handleItemAdded}
+          onItemUpdated={handleItemUpdated}
           onDeleteItem={handleDeleteItem}
+          onCancelEdit={handleCancelEdit}
         />
       </main>
 
